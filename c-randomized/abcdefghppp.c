@@ -1,27 +1,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#define MAX_TRIAL 1000000
+#include <time.h>
 
 int x[9];
 
 void randomize() {
     int i, j, y;
     for (i = 0; i < 9; i++) {
-        int ok = 0;
-        while (!ok) {
-            x[i] = rand() % 10;
-            ok = 1;
-            for (j = 0; j < i; j++) {
-                ok = ok && x[i] != x[j];
-            }
-        }
+        x[i] = rand() % 10;
     }
 }
 
 int correct() {
-    int i, ab, cd, ef, gh, ppp;
+    int i, vis[10], ab, cd, ef, gh, ppp;
+
+    memset(vis, 0, sizeof(vis));
+    for (i = 0; i < 9; i++) {
+        if (vis[x[i]]) {
+            return 0;
+        }
+        vis[x[i]] = 1;
+    }
 
     ab = x[0] * 10 + x[1];
     cd = x[2] * 10 + x[3];
@@ -31,12 +31,19 @@ int correct() {
     return (ab - cd) == ef && (ef + gh) == ppp;
 }
 
+void init() {
+    srand(time(0));
+    randomize();
+}
+
 int main() {
-    int t;
-    do {
+    int t = 0;
+
+    init();
+    // with this number of trials, there is 99.9978% chance returning an answer ;)
+    for (t = 1; !correct() && t > 0; t++) {
         randomize();
-        t++;
-    } while (!correct() && t <= MAX_TRIAL);
+    }
 
     if (correct()) {
         printf("Answer found at #%d trial%s.\n", t, t == 1 ? "": "s");
